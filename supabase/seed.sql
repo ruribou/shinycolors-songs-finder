@@ -90,7 +90,7 @@ insert into vibe_tags (name, slug, sort_order) values
   ('アップテンポ', 'uptempo', 1),
   ('ミドルテンポ', 'midtempo', 2),
   ('バラード', 'ballad', 3),
-  ('スロー', 'slow', 4);
+  ('スローテンポ', 'slow', 4);
 
 -- 感情・情緒（5-8）
 insert into vibe_tags (name, slug, sort_order) values
