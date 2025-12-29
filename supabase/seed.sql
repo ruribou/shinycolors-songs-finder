@@ -87,21 +87,21 @@ where m.name in ('斑鳩ルカ', '鈴木羽那', '郁田はるき') and u.slug =
 -- Vibeタグ
 -- テンポ・ノリ（1-4）
 insert into vibe_tags (name, slug, sort_order) values
-  ('uptempo', 'uptempo', 1),
-  ('midtempo', 'midtempo', 2),
-  ('ballad', 'ballad', 3),
-  ('slow', 'slow', 4);
+  ('アップテンポ', 'uptempo', 1),
+  ('ミドルテンポ', 'midtempo', 2),
+  ('バラード', 'ballad', 3),
+  ('スロー', 'slow', 4);
 
 -- 感情・情緒（5-8）
 insert into vibe_tags (name, slug, sort_order) values
-  ('hopeful', 'hopeful', 5),
-  ('bittersweet', 'bittersweet', 6),
-  ('introspective', 'introspective', 7),
-  ('joyful', 'joyful', 8);
+  ('前向き', 'hopeful', 5),
+  ('切なさ', 'bittersweet', 6),
+  ('内省', 'introspective', 7),
+  ('多幸感', 'joyful', 8);
 
 -- 世界観・テーマ（9-12）
 insert into vibe_tags (name, slug, sort_order) values
-  ('future', 'future', 9),
-  ('daily', 'daily', 10),
-  ('night', 'night', 11),
-  ('growth', 'growth', 12);
+  ('未来', 'future', 9),
+  ('日常', 'daily', 10),
+  ('夜', 'night', 11),
+  ('成長', 'growth', 12);
