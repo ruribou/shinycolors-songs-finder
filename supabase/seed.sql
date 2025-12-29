@@ -94,14 +94,14 @@ insert into vibe_tags (name, slug, sort_order) values
 
 -- 感情・情緒（5-8）
 insert into vibe_tags (name, slug, sort_order) values
-  ('前向き', 'hopeful', 5),
-  ('切なさ', 'bittersweet', 6),
-  ('内省', 'introspective', 7),
-  ('多幸感', 'joyful', 8);
+  ('前向き・希望', 'hopeful', 5),
+  ('切なさ・余韻', 'bittersweet', 6),
+  ('内省・葛藤', 'introspective', 7),
+  ('多幸感・明るさ', 'joyful', 8);
 
 -- 世界観・テーマ（9-12）
 insert into vibe_tags (name, slug, sort_order) values
-  ('未来', 'future', 9),
-  ('日常', 'daily', 10),
-  ('夜', 'night', 11),
-  ('成長', 'growth', 12);
+  ('夢・未来', 'future', 9),
+  ('日常・等身大', 'daily', 10),
+  ('夜・孤独・静けさ', 'night', 11),
+  ('成長・変化', 'growth', 12);
