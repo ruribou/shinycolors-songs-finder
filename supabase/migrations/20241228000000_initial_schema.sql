@@ -1,5 +1,5 @@
 -- シャニマス楽曲検索 初期スキーマ
--- 本番環境セットアップ用（全マイグレーション統合版）
+-- 全マイグレーション統合版
 
 -- 拡張機能
 create extension if not exists pg_trgm;
@@ -13,9 +13,12 @@ create table units (
 );
 
 -- members: アイドルマスタ
+create type attribute_type as enum ('stella', 'luna', 'sol');
+
 create table members (
   id uuid primary key default gen_random_uuid(),
   name text not null unique,
+  attribute attribute_type not null,
   sort_order int not null default 0,
   created_at timestamptz not null default now()
 );
@@ -30,7 +33,6 @@ create table member_units (
 
 -- songs: 楽曲テーブル
 create type song_type as enum ('unit', 'solo', 'collaboration', 'other');
-create type attribute_type as enum ('stella', 'luna', 'sol');
 
 create table songs (
   id uuid primary key default gen_random_uuid(),
@@ -38,7 +40,6 @@ create table songs (
   unit_id uuid references units(id) on delete restrict,
   member_id uuid references members(id) on delete restrict,
   song_type song_type not null default 'unit',
-  attribute attribute_type,
   youtube_url text,
   links jsonb default '{}',
   is_published boolean not null default false,
@@ -122,7 +123,6 @@ $$ language plpgsql security definer;
 create index songs_unit_id_idx on songs(unit_id);
 create index songs_member_id_idx on songs(member_id) where member_id is not null;
 create index songs_song_type_idx on songs(song_type);
-create index songs_attribute_idx on songs(attribute) where attribute is not null;
 create index songs_title_idx on songs using gin(title gin_trgm_ops);
 create index songs_is_published_idx on songs(is_published) where is_published = true;
 create index vibe_tags_sort_order_idx on vibe_tags(sort_order);
