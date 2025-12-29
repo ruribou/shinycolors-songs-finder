@@ -85,19 +85,23 @@ select m.id, u.id, true from members m, units u
 where m.name in ('斑鳩ルカ', '鈴木羽那', '郁田はるき') and u.slug = 'cometik';
 
 -- Vibeタグ
+-- テンポ・ノリ（1-4）
 insert into vibe_tags (name, slug, sort_order) values
-  ('楽しい', 'tanoshii', 1),
-  ('かわいい', 'kawaii', 2),
-  ('かっこいい', 'kakkoii', 3),
-  ('キラキラ', 'kirakira', 4),
-  ('温かい', 'atatakai', 5),
-  ('胸に迫る', 'mune-ni-semaru', 6),
-  ('疾走感', 'shissou-kan', 7),
-  ('ゆったり', 'yuttari', 8),
-  ('踊れる', 'odoreru', 9),
-  ('和風', 'wafuu', 10),
-  ('切ない', 'setsunai', 11),
-  ('クセが強い', 'kuse-ga-tsuyoi', 12),
-  ('エモい', 'emoi', 13),
-  ('爽やか', 'sawayaka', 14),
-  ('力強い', 'chikaradzuyoi', 15);
+  ('uptempo', 'uptempo', 1),
+  ('midtempo', 'midtempo', 2),
+  ('ballad', 'ballad', 3),
+  ('slow', 'slow', 4);
+
+-- 感情・情緒（5-8）
+insert into vibe_tags (name, slug, sort_order) values
+  ('hopeful', 'hopeful', 5),
+  ('bittersweet', 'bittersweet', 6),
+  ('introspective', 'introspective', 7),
+  ('joyful', 'joyful', 8);
+
+-- 世界観・テーマ（9-12）
+insert into vibe_tags (name, slug, sort_order) values
+  ('future', 'future', 9),
+  ('daily', 'daily', 10),
+  ('night', 'night', 11),
+  ('growth', 'growth', 12);
