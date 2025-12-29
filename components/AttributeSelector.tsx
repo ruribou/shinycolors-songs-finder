@@ -22,7 +22,7 @@ export function AttributeSelector({
   return (
     <div className="space-y-3">
       <h2 className="text-sm font-bold text-slate-700 tracking-wide">
-        属性 <span className="text-xs font-normal text-slate-500">（ソロ曲のみ）</span>
+        属性
       </h2>
       <div className="flex flex-wrap gap-3">
         {attributes.map(({ value, label, color }) => {

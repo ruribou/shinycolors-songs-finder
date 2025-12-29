@@ -2,7 +2,7 @@
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
-import type { SongType, Song } from "@/lib/types/database";
+import type { SongType, Song, AttributeType } from "@/lib/types/database";
 import { canPublishSong } from "@/lib/types/database";
 
 interface SongInput {
@@ -10,6 +10,7 @@ interface SongInput {
   unit_id: string | null;
   member_id: string | null;
   song_type: SongType;
+  attribute: AttributeType | null;
   youtube_url: string | null;
   vibe_tag_ids: string[];
 }

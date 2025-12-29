@@ -7,6 +7,7 @@ import type {
   Unit,
   VibeTag,
   SongType,
+  AttributeType,
 } from "@/lib/types/database";
 import { createSong, deleteSong, togglePublishSong } from "./actions";
 import { canPublishSong } from "@/lib/types/database";
@@ -31,6 +32,12 @@ const songTypes: { value: SongType; label: string }[] = [
   { value: "other", label: "その他" },
 ];
 
+const attributeOptions: { value: AttributeType; label: string }[] = [
+  { value: "stella", label: "Stella" },
+  { value: "luna", label: "Luna" },
+  { value: "sol", label: "Sol" },
+];
+
 export function SongTable({ songs, units, vibeTags, members }: SongTableProps) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,6 +51,7 @@ export function SongTable({ songs, units, vibeTags, members }: SongTableProps) {
     unit_id: "",
     member_id: "",
     song_type: "unit" as SongType,
+    attribute: "" as AttributeType | "",
     youtube_url: "",
     vibe_tag_ids: [] as string[],
   });
@@ -54,6 +62,7 @@ export function SongTable({ songs, units, vibeTags, members }: SongTableProps) {
       unit_id: "",
       member_id: "",
       song_type: "unit",
+      attribute: "",
       youtube_url: "",
       vibe_tag_ids: [],
     });
@@ -86,6 +95,7 @@ export function SongTable({ songs, units, vibeTags, members }: SongTableProps) {
       unit_id: formData.unit_id || null,
       member_id: formData.member_id || null,
       song_type: formData.song_type,
+      attribute: formData.attribute || null,
       youtube_url: formData.youtube_url || null,
       vibe_tag_ids: formData.vibe_tag_ids,
     };
@@ -242,6 +252,35 @@ export function SongTable({ songs, units, vibeTags, members }: SongTableProps) {
                     </option>
                   ))}
                 </select>
+              </div>
+            )}
+
+            {(formData.song_type === "collaboration" ||
+              formData.song_type === "other") && (
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  属性（属性チーム曲の場合）
+                </label>
+                <select
+                  value={formData.attribute}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      attribute: e.target.value as AttributeType | "",
+                    })
+                  }
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-shiny-blue"
+                >
+                  <option value="">なし</option>
+                  {attributeOptions.map((attr) => (
+                    <option key={attr.value} value={attr.value}>
+                      {attr.label}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-1 text-xs text-slate-500">
+                  Team.Stella等の曲の場合に選択
+                </p>
               </div>
             )}
 

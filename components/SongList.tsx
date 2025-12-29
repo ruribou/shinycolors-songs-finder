@@ -13,16 +13,19 @@ const attributeStyles = {
     bg: "bg-gradient-to-r from-pink-100 to-pink-50",
     text: "text-pink-600",
     border: "border-pink-200",
+    teamName: "Team.Stella",
   },
   luna: {
     bg: "bg-gradient-to-r from-blue-100 to-blue-50",
     text: "text-blue-600",
     border: "border-blue-200",
+    teamName: "Team.Luna",
   },
   sol: {
     bg: "bg-gradient-to-r from-amber-100 to-amber-50",
     text: "text-amber-600",
     border: "border-amber-200",
+    teamName: "Team.Sol",
   },
 };
 
@@ -52,8 +55,10 @@ export function SongList({ songs }: SongListProps) {
             ? extractVideoId(song.youtube_url)
             : null;
           const thumbnailUrl = videoId ? getThumbnailUrl(videoId, "mq") : null;
+          const songAttr = song.attribute as AttributeType | undefined;
           const memberAttr = song.member?.attribute as AttributeType | undefined;
-          const attrStyle = memberAttr ? attributeStyles[memberAttr] : null;
+          const displayAttr = songAttr ?? memberAttr;
+          const attrStyle = displayAttr ? attributeStyles[displayAttr] : null;
 
           return (
             <a
@@ -92,7 +97,9 @@ export function SongList({ songs }: SongListProps) {
                   {song.title}
                 </h3>
                 <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-slate-600">
-                  <span className="font-medium">{song.unit?.name}</span>
+                  <span className="font-medium">
+                    {songAttr ? attrStyle?.teamName : song.unit?.name}
+                  </span>
                   {song.member && (
                     <>
                       <span className="text-slate-300">/</span>
@@ -101,11 +108,11 @@ export function SongList({ songs }: SongListProps) {
                   )}
                 </div>
                 <div className="mt-3 flex flex-wrap items-center gap-2">
-                  {attrStyle && memberAttr && (
+                  {attrStyle && displayAttr && (
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-bold ${attrStyle.bg} ${attrStyle.text} border ${attrStyle.border}`}
                     >
-                      {memberAttr.charAt(0).toUpperCase() + memberAttr.slice(1)}
+                      {displayAttr.charAt(0).toUpperCase() + displayAttr.slice(1)}
                     </span>
                   )}
                   {song.vibe_tags.slice(0, 3).map((tag) => (

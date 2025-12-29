@@ -36,6 +36,7 @@ export interface Song {
   unit_id: string | null;
   member_id: string | null;
   song_type: SongType;
+  attribute: AttributeType | null;
   youtube_url: string | null;
   links: Record<string, string>;
   is_published: boolean;

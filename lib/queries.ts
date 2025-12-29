@@ -59,11 +59,10 @@ export async function getSongs(
       .from("members")
       .select("id")
       .eq("attribute", filters.attribute);
-    if (membersWithAttr && membersWithAttr.length > 0) {
-      query = query.in("member_id", membersWithAttr.map((m) => m.id));
-    } else {
-      return [];
-    }
+    const memberIds = membersWithAttr?.map((m) => m.id) ?? [];
+    query = query.or(
+      `attribute.eq.${filters.attribute},member_id.in.(${memberIds.join(",")})`
+    );
   }
 
   const { data, error } = await query.order("created_at");
@@ -122,7 +121,7 @@ export async function getSongCounts(
   }
 
   for (const song of songsForAttrs) {
-    const attr = song.member?.attribute;
+    const attr = song.attribute ?? song.member?.attribute;
     if (attr) {
       counts.attributes[attr]++;
     }
