@@ -26,6 +26,7 @@ supabase db reset # DBリセット（マイグレーション再実行）
 - Tailwind CSS 4
 - TypeScript 5（strict mode）
 - ESLint 9（eslint-config-next）
+- TanStack Query 5（データフェッチ・キャッシュ）
 - Supabase（PostgreSQL + Auth）
 - @supabase/ssr（SSR対応クライアント）
 
@@ -40,6 +41,9 @@ app/                      # Next.js App Router
 components/               # 共通UIコンポーネント
 lib/
   auth/                   # 認証ヘルパー（isAdmin, rateLimit）
+  hooks/                  # カスタムフック
+    useFilterState.ts     # URLパラメータ連携フィルタ状態
+    useSongsQuery.ts      # TanStack Query楽曲取得フック
   supabase/               # Supabaseクライアント
     admin.ts              # Service Roleクライアント（RLSバイパス）
     server.ts             # サーバーサイドクライアント

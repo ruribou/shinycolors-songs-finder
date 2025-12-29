@@ -14,6 +14,7 @@
 - React 19
 - TypeScript 5
 - Tailwind CSS 4
+- TanStack Query（データフェッチ・キャッシュ）
 - Supabase（PostgreSQL + Auth）
 
 ## ローカル開発
