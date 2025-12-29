@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import type { VibeTag } from "@/lib/types/database";
 import { createVibeTag, updateVibeTag, deleteVibeTag } from "./actions";
 
@@ -9,6 +10,7 @@ interface VibeTagListProps {
 }
 
 export function VibeTagList({ initialTags }: VibeTagListProps) {
+  const router = useRouter();
   const [tags, setTags] = useState(initialTags);
   const [newTagName, setNewTagName] = useState("");
   const [newTagSlug, setNewTagSlug] = useState("");
@@ -34,7 +36,7 @@ export function VibeTagList({ initialTags }: VibeTagListProps) {
       setMessage({ type: "success", text: "タグを追加しました" });
       setNewTagName("");
       setNewTagSlug("");
-      window.location.reload();
+      router.refresh();
     } else {
       setMessage({ type: "error", text: result.error || "エラーが発生しました" });
     }
