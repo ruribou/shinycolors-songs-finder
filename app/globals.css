@@ -25,7 +25,7 @@ html {
 }
 
 body {
-  background: linear-gradient(180deg, var(--shiny-blue-light) 0%, var(--background) 20%, #ffffff 100%);
+  background: linear-gradient(180deg, var(--shiny-blue-light) 0%, var(--background) 400px, #ffffff 800px);
   color: var(--foreground);
   min-height: 100vh;
   overscroll-behavior: none;
