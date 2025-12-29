@@ -1,16 +1,22 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import type { VibeTag } from "@/lib/types/database";
-import { createVibeTag, deleteVibeTag } from "./actions";
+import { createVibeTag, updateVibeTag, deleteVibeTag } from "./actions";
 
 interface VibeTagListProps {
   initialTags: VibeTag[];
 }
 
 export function VibeTagList({ initialTags }: VibeTagListProps) {
+  const router = useRouter();
   const [tags, setTags] = useState(initialTags);
   const [newTagName, setNewTagName] = useState("");
+  const [newTagSlug, setNewTagSlug] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState("");
+  const [editingSlug, setEditingSlug] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<{
     type: "success" | "error";
@@ -29,10 +35,31 @@ export function VibeTagList({ initialTags }: VibeTagListProps) {
     if (result.success) {
       setMessage({ type: "success", text: "タグを追加しました" });
       setNewTagName("");
-      // ページをリロードして最新データを取得
-      window.location.reload();
+      setNewTagSlug("");
+      router.refresh();
     } else {
       setMessage({ type: "error", text: result.error || "エラーが発生しました" });
+    }
+
+    setIsSubmitting(false);
+  };
+
+  const handleUpdate = async (id: string) => {
+    if (!editingName.trim() || !editingSlug.trim()) return;
+
+    setIsSubmitting(true);
+    const result = await updateVibeTag(id, editingName.trim(), editingSlug.trim());
+
+    if (result.success) {
+      setTags(
+        tags.map((t) =>
+          t.id === id ? { ...t, name: editingName.trim(), slug: editingSlug.trim() } : t
+        )
+      );
+      setEditingId(null);
+      setMessage({ type: "success", text: "タグを更新しました" });
+    } else {
+      setMessage({ type: "error", text: result.error || "更新に失敗しました" });
     }
 
     setIsSubmitting(false);
@@ -51,6 +78,18 @@ export function VibeTagList({ initialTags }: VibeTagListProps) {
     } else {
       setMessage({ type: "error", text: result.error || "削除に失敗しました" });
     }
+  };
+
+  const startEdit = (tag: VibeTag) => {
+    setEditingId(tag.id);
+    setEditingName(tag.name);
+    setEditingSlug(tag.slug);
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditingName("");
+    setEditingSlug("");
   };
 
   return (
@@ -90,16 +129,58 @@ export function VibeTagList({ initialTags }: VibeTagListProps) {
             key={tag.id}
             className="flex items-center justify-between px-4 py-3"
           >
-            <div>
-              <span className="text-slate-800">{tag.name}</span>
-              <span className="ml-2 text-xs text-slate-400">({tag.slug})</span>
-            </div>
-            <button
-              onClick={() => handleDelete(tag.id, tag.name)}
-              className="px-3 py-1 text-sm text-red-600 hover:text-red-700"
-            >
-              削除
-            </button>
+            {editingId === tag.id ? (
+              <div className="flex-1 flex gap-2 items-center">
+                <input
+                  type="text"
+                  value={editingName}
+                  onChange={(e) => setEditingName(e.target.value)}
+                  placeholder="タグ名"
+                  className="flex-1 px-3 py-1 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-shiny-blue"
+                />
+                <input
+                  type="text"
+                  value={editingSlug}
+                  onChange={(e) => setEditingSlug(e.target.value)}
+                  placeholder="slug"
+                  className="w-40 px-3 py-1 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-shiny-blue text-sm"
+                />
+                <button
+                  onClick={() => handleUpdate(tag.id)}
+                  disabled={isSubmitting || !editingName.trim() || !editingSlug.trim()}
+                  className="px-3 py-1 text-sm bg-shiny-blue text-white rounded hover:bg-shiny-blue-dark disabled:opacity-50"
+                >
+                  保存
+                </button>
+                <button
+                  onClick={cancelEdit}
+                  className="px-3 py-1 text-sm text-slate-600 hover:text-slate-800"
+                >
+                  キャンセル
+                </button>
+              </div>
+            ) : (
+              <>
+                <div>
+                  <span className="text-slate-800">{tag.name}</span>
+                  <span className="ml-2 text-xs text-slate-400">({tag.slug})</span>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => startEdit(tag)}
+                    className="px-3 py-1 text-sm text-shiny-blue hover:text-shiny-blue-dark"
+                  >
+                    編集
+                  </button>
+                  <button
+                    onClick={() => handleDelete(tag.id, tag.name)}
+                    className="px-3 py-1 text-sm text-red-600 hover:text-red-700"
+                  >
+                    削除
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         ))}
         {tags.length === 0 && (

@@ -90,7 +90,7 @@ export default function EditSongPage({ params }: PageProps) {
 
     if (result.success) {
       setMessage({ type: "success", text: "楽曲を更新しました" });
-      setTimeout(() => router.push("/admin/songs"), 1000);
+      setTimeout(() => router.push("/admin/songs", { scroll: false }), 1000);
     } else {
       setMessage({ type: "error", text: result.error || "エラーが発生しました" });
     }
@@ -112,6 +112,7 @@ export default function EditSongPage({ params }: PageProps) {
         <div className="max-w-2xl mx-auto px-4 py-8">
           <Link
             href="/admin/songs"
+            scroll={false}
             className="text-shiny-blue-dark hover:text-shiny-blue text-sm"
           >
             楽曲一覧に戻る
@@ -130,6 +131,7 @@ export default function EditSongPage({ params }: PageProps) {
         <header className="mb-8">
           <Link
             href="/admin/songs"
+            scroll={false}
             className="text-shiny-blue-dark hover:text-shiny-blue text-sm"
           >
             楽曲一覧に戻る
@@ -310,6 +312,7 @@ export default function EditSongPage({ params }: PageProps) {
               </button>
               <Link
                 href="/admin/songs"
+                scroll={false}
                 className="px-6 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors text-sm"
               >
                 キャンセル

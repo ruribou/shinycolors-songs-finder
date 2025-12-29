@@ -13,6 +13,7 @@ export default async function AdminVibeTagsPage() {
         <header className="mb-8">
           <Link
             href="/admin"
+            scroll={false}
             className="text-shiny-blue-dark hover:text-shiny-blue text-sm"
           >
             管理画面に戻る
