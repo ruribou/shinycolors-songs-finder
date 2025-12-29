@@ -72,3 +72,7 @@ supabase/
   migrations/           # DBマイグレーション
   seed.sql              # 初期データ
 ```
+
+## 使用ライブラリ
+
+- [shinycolors-icons](https://github.com/g-Ratie/shinycolors-icons) - シャイニーカラーズのアイコンセット
