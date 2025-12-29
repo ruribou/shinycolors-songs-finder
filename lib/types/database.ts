@@ -57,7 +57,8 @@ export function canPublishSong(song: Song): boolean {
   if (!song.title || !song.youtube_url) {
     return false;
   }
-  if (song.song_type !== "collaboration" && !song.unit_id) {
+  const hasUnitOrAttribute = song.unit_id || song.attribute;
+  if (song.song_type !== "collaboration" && !hasUnitOrAttribute) {
     return false;
   }
   if (song.song_type === "solo" && !song.member_id) {

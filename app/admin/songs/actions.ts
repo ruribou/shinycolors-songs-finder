@@ -126,7 +126,7 @@ export async function togglePublishSong(id: string): Promise<ActionResult> {
   if (!song.is_published && !canPublishSong(song as Song)) {
     return {
       success: false,
-      error: "公開に必要な項目が未設定です（YouTube URL必須、コラボ曲以外はユニット必須、ソロ曲はメンバー必須）",
+      error: "公開に必要な項目が未設定です（YouTube URL必須、コラボ曲以外はユニットか属性が必須、ソロ曲はメンバー必須）",
     };
   }
 
