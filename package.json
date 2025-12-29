@@ -14,7 +14,7 @@
     "next": "16.1.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "shinycolors-icons": "^1.1.4"
+    "shinycolors-icons": "^1.1.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

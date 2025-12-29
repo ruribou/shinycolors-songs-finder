@@ -22,7 +22,7 @@ const unitIconMap: Record<string, React.FC<{ size?: number | string }>> = {
   noctchill: Noctchill,
   shhis: Shhis,
   cometik: Cometik,
-  "shiny-colors": ShinyColors,
+  shinycolors: ShinyColors,
 };
 
 interface UnitSelectorProps {
@@ -65,7 +65,7 @@ export function UnitSelector({
             >
               {Icon ? (
                 <div className={`flex items-center justify-center w-10 h-10 transition-transform duration-200 ${isSelected ? "scale-110" : ""}`}>
-                  <Icon size={32} />
+                  <Icon size={28} />
                 </div>
               ) : (
                 <span className="w-10 h-10 flex items-center justify-center text-sm font-bold bg-shiny-blue/20 text-shiny-blue-dark rounded-xl">
