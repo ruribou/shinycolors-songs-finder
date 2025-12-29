@@ -1,14 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
 import { useFilterState } from "@/lib/hooks/useFilterState";
-import { getSongs, getSongCounts } from "@/lib/queries";
-import type {
-  Unit,
-  VibeTag,
-  SongWithRelations,
-  AttributeType,
-} from "@/lib/types/database";
+import { useSongsQuery, useSongCountsQuery } from "@/lib/hooks/useSongsQuery";
+import type { Unit, VibeTag, AttributeType } from "@/lib/types/database";
 import { UnitSelector } from "./UnitSelector";
 import { AttributeSelector } from "./AttributeSelector";
 import { VibeTagSelector } from "./VibeTagSelector";
@@ -33,90 +27,51 @@ export function SongFinderClient({
     clearFilters,
   } = useFilterState();
 
-  const [songs, setSongs] = useState<SongWithRelations[]>([]);
-  const [counts, setCounts] = useState<{
+  const filters = {
+    unitSlug: unitSlug ?? undefined,
+    attribute: attribute ?? undefined,
+    vibeTagSlugs: vibeTagSlugs.length > 0 ? vibeTagSlugs : undefined,
+  };
+
+  const {
+    data: songs = [],
+    isLoading: isInitialLoading,
+    isFetching,
+  } = useSongsQuery(filters);
+
+  const { data: counts } = useSongCountsQuery(filters);
+
+  const defaultCounts: {
     units: Record<string, number>;
     attributes: Record<AttributeType, number>;
     vibeTags: Record<string, number>;
-  }>({
+  } = {
     units: {},
     attributes: { stella: 0, luna: 0, sol: 0 },
     vibeTags: {},
-  });
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
-  const [isFetching, setIsFetching] = useState(false);
-  const isFirstMount = useRef(true);
-
-  const vibeTagKey = vibeTagSlugs.join(",");
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const fetchData = async () => {
-      if (isFirstMount.current) {
-        setIsInitialLoading(true);
-      } else {
-        setIsFetching(true);
-      }
-
-      try {
-        const [songsResult, countsResult] = await Promise.all([
-          getSongs({
-            unitSlug: unitSlug ?? undefined,
-            attribute: attribute ?? undefined,
-            vibeTagSlugs: vibeTagSlugs.length > 0 ? vibeTagSlugs : undefined,
-          }),
-          getSongCounts({
-            unitSlug: unitSlug ?? undefined,
-            attribute: attribute ?? undefined,
-            vibeTagSlugs: vibeTagSlugs.length > 0 ? vibeTagSlugs : undefined,
-          }),
-        ]);
-
-        if (!cancelled) {
-          setSongs(songsResult);
-          setCounts(countsResult);
-        }
-      } finally {
-        if (!cancelled) {
-          setIsInitialLoading(false);
-          setIsFetching(false);
-          isFirstMount.current = false;
-        }
-      }
-    };
-
-    fetchData();
-
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [unitSlug, attribute, vibeTagKey]);
+  };
 
   const hasActiveFilters =
-    unitSlug !== null ||
-    attribute !== null ||
-    vibeTagSlugs.length > 0;
+    unitSlug !== null || attribute !== null || vibeTagSlugs.length > 0;
 
   return (
     <div className="space-y-6">
       <UnitSelector
         units={initialUnits}
-        counts={counts.units}
+        counts={counts?.units ?? defaultCounts.units}
         selectedSlug={unitSlug}
         onSelect={toggleUnit}
       />
 
       <AttributeSelector
-        counts={counts.attributes}
+        counts={counts?.attributes ?? defaultCounts.attributes}
         selectedAttribute={attribute}
         onSelect={toggleAttribute}
       />
 
       <VibeTagSelector
         vibeTags={initialVibeTags}
-        counts={counts.vibeTags}
+        counts={counts?.vibeTags ?? defaultCounts.vibeTags}
         selectedSlugs={vibeTagSlugs}
         onToggle={toggleVibeTag}
       />
@@ -152,7 +107,9 @@ export function SongFinderClient({
           </div>
         </div>
       ) : (
-        <div className={`transition-opacity duration-200 ${isFetching ? "opacity-50" : "opacity-100"}`}>
+        <div
+          className={`transition-opacity duration-200 ${isFetching ? "opacity-50" : "opacity-100"}`}
+        >
           <SongList songs={songs} />
         </div>
       )}
