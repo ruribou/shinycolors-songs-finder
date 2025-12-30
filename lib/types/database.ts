@@ -30,10 +30,15 @@ export interface VibeTag {
   sort_order: number;
 }
 
+export interface SongUnit {
+  song_id: string;
+  unit_id: string;
+  unit?: Unit;
+}
+
 export interface Song {
   id: string;
   title: string;
-  unit_id: string | null;
   member_id: string | null;
   song_type: SongType;
   attribute: AttributeType | null;
@@ -42,13 +47,13 @@ export interface Song {
   is_published: boolean;
   created_at: string;
   updated_at: string;
-  unit?: Unit | null;
   member?: Member | null;
   vibe_tags?: VibeTag[];
+  units?: Unit[];
 }
 
 export interface SongWithRelations extends Song {
-  unit: Unit | null;
+  units: Unit[];
   member: Member | null;
   vibe_tags: VibeTag[];
 }
@@ -57,7 +62,8 @@ export function canPublishSong(song: Song): boolean {
   if (!song.title || !song.youtube_url) {
     return false;
   }
-  const hasUnitOrAttribute = song.unit_id || song.attribute;
+  const hasUnitOrAttribute =
+    (song.units && song.units.length > 0) || song.attribute;
   if (song.song_type !== "collaboration" && !hasUnitOrAttribute) {
     return false;
   }
