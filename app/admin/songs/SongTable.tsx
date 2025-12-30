@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import type {
   SongWithRelations,
@@ -11,6 +11,8 @@ import type {
 } from "@/lib/types/database";
 import { createSong, deleteSong, togglePublishSong } from "./actions";
 import { canPublishSong } from "@/lib/types/database";
+
+const SCROLL_STORAGE_KEY = "admin-songs-scroll";
 
 interface Member {
   id: string;
@@ -41,10 +43,21 @@ const attributeOptions: { value: AttributeType; label: string }[] = [
 export function SongTable({ songs, units, vibeTags, members }: SongTableProps) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [message, setMessage] = useState<{
     type: "success" | "error";
     text: string;
   } | null>(null);
+
+  const filteredSongs = songs.filter((song) => {
+    if (!searchQuery.trim()) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      song.title.toLowerCase().includes(query) ||
+      song.unit?.name.toLowerCase().includes(query) ||
+      song.member?.name.toLowerCase().includes(query)
+    );
+  });
 
   const [formData, setFormData] = useState({
     title: "",
@@ -83,6 +96,24 @@ export function SongTable({ songs, units, vibeTags, members }: SongTableProps) {
       document.body.style.overflow = "";
     };
   }, [isFormOpen]);
+
+  const saveScrollPosition = useCallback(() => {
+    sessionStorage.setItem(SCROLL_STORAGE_KEY, String(window.scrollY));
+  }, []);
+
+  useEffect(() => {
+    const savedPosition = sessionStorage.getItem(SCROLL_STORAGE_KEY);
+    if (savedPosition) {
+      requestAnimationFrame(() => {
+        window.scrollTo(0, parseInt(savedPosition, 10));
+      });
+    }
+
+    window.addEventListener("scroll", saveScrollPosition);
+    return () => {
+      window.removeEventListener("scroll", saveScrollPosition);
+    };
+  }, [saveScrollPosition]);
 
   const handleTogglePublish = async (song: SongWithRelations) => {
     const result = await togglePublishSong(song.id);
@@ -137,10 +168,19 @@ export function SongTable({ songs, units, vibeTags, members }: SongTableProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
+      <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+        <div className="flex-1 max-w-md">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="曲名、ユニット名、メンバー名で検索..."
+            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-shiny-blue text-sm"
+          />
+        </div>
         <button
           onClick={openCreateForm}
-          className="px-4 py-2 bg-shiny-blue text-white rounded-lg hover:bg-shiny-blue-dark transition-colors text-sm font-medium"
+          className="px-4 py-2 bg-shiny-blue text-white rounded-lg hover:bg-shiny-blue-dark transition-colors text-sm font-medium whitespace-nowrap"
         >
           楽曲を追加
         </button>
@@ -401,7 +441,7 @@ export function SongTable({ songs, units, vibeTags, members }: SongTableProps) {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200">
-            {songs.map((song) => {
+            {filteredSongs.map((song) => {
               const publishable = canPublishSong(song);
               return (
                 <tr key={song.id} className="hover:bg-slate-50">
@@ -478,9 +518,9 @@ export function SongTable({ songs, units, vibeTags, members }: SongTableProps) {
             })}
           </tbody>
         </table>
-        {songs.length === 0 && (
+        {filteredSongs.length === 0 && (
           <div className="text-center py-12 text-slate-500">
-            楽曲がありません
+            {searchQuery ? "検索結果がありません" : "楽曲がありません"}
           </div>
         )}
       </div>
