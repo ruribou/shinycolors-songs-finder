@@ -45,6 +45,7 @@ export async function createSong(input: SongInput): Promise<ActionResult> {
 
     if (unitError) {
       console.error("Failed to add units:", unitError);
+      return { success: false, error: "ユニットの追加に失敗しました" };
     }
   }
 
@@ -58,6 +59,7 @@ export async function createSong(input: SongInput): Promise<ActionResult> {
 
     if (tagError) {
       console.error("Failed to add vibe tags:", tagError);
+      return { success: false, error: "タグの追加に失敗しました" };
     }
   }
 
@@ -97,6 +99,7 @@ export async function updateSong(
 
     if (unitError) {
       console.error("Failed to add units:", unitError);
+      return { success: false, error: "ユニットの更新に失敗しました" };
     }
   }
 
@@ -113,6 +116,7 @@ export async function updateSong(
 
     if (tagError) {
       console.error("Failed to add vibe tags:", tagError);
+      return { success: false, error: "タグの更新に失敗しました" };
     }
   }
 
@@ -124,9 +128,7 @@ export async function updateSong(
 
 export async function deleteSong(id: string): Promise<ActionResult> {
   const supabase = createAdminClient();
-  await supabase.from("song_units").delete().eq("song_id", id);
-  await supabase.from("song_vibe_tags").delete().eq("song_id", id);
-
+  // song_units, song_vibe_tagsはON DELETE CASCADEで自動削除される
   const { error } = await supabase.from("songs").delete().eq("id", id);
 
   if (error) {
