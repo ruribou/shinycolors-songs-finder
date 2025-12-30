@@ -501,6 +501,7 @@ export function SongTable({ songs, units, vibeTags, members }: SongTableProps) {
                       </button>
                       <Link
                         href={`/admin/songs/${song.id}/edit`}
+                        prefetch={false}
                         className="px-2 py-1 text-xs text-shiny-blue-dark hover:text-shiny-blue"
                       >
                         編集
