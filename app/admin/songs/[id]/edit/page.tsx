@@ -46,7 +46,7 @@ export default function EditSongPage({ params }: PageProps) {
 
   const [formData, setFormData] = useState({
     title: "",
-    unit_id: "",
+    unit_ids: [] as string[],
     member_id: "",
     song_type: "unit" as SongType,
     attribute: "" as AttributeType | "",
@@ -69,7 +69,7 @@ export default function EditSongPage({ params }: PageProps) {
       setMembers(data.members);
       setFormData({
         title: data.song.title,
-        unit_id: data.song.unit_id || "",
+        unit_ids: data.song.units?.map((u: Unit) => u.id) || [],
         member_id: data.song.member_id || "",
         song_type: data.song.song_type,
         attribute: data.song.attribute || "",
@@ -88,7 +88,7 @@ export default function EditSongPage({ params }: PageProps) {
 
     const input = {
       title: formData.title,
-      unit_id: formData.unit_id || null,
+      unit_ids: formData.unit_ids,
       member_id: formData.member_id || null,
       song_type: formData.song_type,
       attribute: formData.attribute || null,
@@ -195,29 +195,50 @@ export default function EditSongPage({ params }: PageProps) {
               />
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  ユニット
-                </label>
-                <select
-                  value={formData.unit_id}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      unit_id: e.target.value,
-                    })
-                  }
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-shiny-blue"
-                >
-                  <option value="">選択してください</option>
-                  {units.map((unit) => (
-                    <option key={unit.id} value={unit.id}>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                ユニット（複数選択可）
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {units.map((unit) => {
+                  const isSelected = formData.unit_ids.includes(unit.id);
+                  return (
+                    <label
+                      key={unit.id}
+                      className={`px-3 py-1.5 rounded-full text-sm transition-colors cursor-pointer ${
+                        isSelected
+                          ? "bg-shiny-blue text-white"
+                          : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        className="hidden"
+                        checked={isSelected}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setFormData({
+                              ...formData,
+                              unit_ids: [...formData.unit_ids, unit.id],
+                            });
+                          } else {
+                            setFormData({
+                              ...formData,
+                              unit_ids: formData.unit_ids.filter(
+                                (id) => id !== unit.id
+                              ),
+                            });
+                          }
+                        }}
+                      />
                       {unit.name}
-                    </option>
-                  ))}
-                </select>
+                    </label>
+                  );
+                })}
               </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">
                   曲タイプ <span className="text-red-500">*</span>

@@ -97,9 +97,13 @@ export function SongList({ songs }: SongListProps) {
                   {song.title}
                 </h3>
                 <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-slate-600">
-                  <span className="font-medium">
-                    {songAttr ? attrStyle?.teamName : song.unit?.name}
-                  </span>
+                  {songAttr ? (
+                    <span className="font-medium">{attrStyle?.teamName}</span>
+                  ) : song.units && song.units.length > 0 ? (
+                    <span className="font-medium">
+                      {song.units.map((u) => u.name).join(" / ")}
+                    </span>
+                  ) : null}
                   {song.member && (
                     <>
                       <span className="text-slate-300">/</span>

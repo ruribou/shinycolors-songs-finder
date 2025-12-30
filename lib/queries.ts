@@ -38,7 +38,7 @@ export async function getSongs(
 ): Promise<SongWithRelations[]> {
   let query = supabase.from("songs").select(`
       *,
-      unit:units(*),
+      units:song_units(unit:units(*)),
       member:members(*),
       vibe_tags:song_vibe_tags(vibe_tag:vibe_tags(*))
     `);
@@ -50,7 +50,16 @@ export async function getSongs(
       .eq("slug", filters.unitSlug)
       .single();
     if (unit) {
-      query = query.eq("unit_id", unit.id);
+      const { data: songUnits } = await supabase
+        .from("song_units")
+        .select("song_id")
+        .eq("unit_id", unit.id);
+      const songIds = songUnits?.map((su) => su.song_id) ?? [];
+      if (songIds.length > 0) {
+        query = query.in("id", songIds);
+      } else {
+        return [];
+      }
     }
   }
 
@@ -71,9 +80,12 @@ export async function getSongs(
 
   const songs = (data ?? []).map((song) => ({
     ...song,
-    vibe_tags: song.vibe_tags?.map(
-      (svt: { vibe_tag: VibeTag }) => svt.vibe_tag
-    ) ?? [],
+    units:
+      song.units
+        ?.map((su: { unit: Unit }) => su.unit)
+        .filter((u: Unit | null): u is Unit => u !== null) ?? [],
+    vibe_tags:
+      song.vibe_tags?.map((svt: { vibe_tag: VibeTag }) => svt.vibe_tag) ?? [],
   })) as SongWithRelations[];
 
   if (filters.vibeTagSlugs && filters.vibeTagSlugs.length > 0) {
@@ -114,9 +126,10 @@ export async function getSongCounts(
   };
 
   for (const song of songsForUnits) {
-    const slug = song.unit?.slug;
-    if (slug) {
-      counts.units[slug] = (counts.units[slug] ?? 0) + 1;
+    for (const unit of song.units ?? []) {
+      if (unit.slug) {
+        counts.units[unit.slug] = (counts.units[unit.slug] ?? 0) + 1;
+      }
     }
   }
 

@@ -7,7 +7,7 @@ import { canPublishSong } from "@/lib/types/database";
 
 interface SongInput {
   title: string;
-  unit_id: string | null;
+  unit_ids: string[];
   member_id: string | null;
   song_type: SongType;
   attribute: AttributeType | null;
@@ -22,7 +22,7 @@ interface ActionResult {
 
 export async function createSong(input: SongInput): Promise<ActionResult> {
   const supabase = createAdminClient();
-  const { vibe_tag_ids, ...songData } = input;
+  const { unit_ids, vibe_tag_ids, ...songData } = input;
 
   const { data: song, error: songError } = await supabase
     .from("songs")
@@ -35,6 +35,20 @@ export async function createSong(input: SongInput): Promise<ActionResult> {
     return { success: false, error: "楽曲の作成に失敗しました" };
   }
 
+  if (unit_ids.length > 0) {
+    const { error: unitError } = await supabase.from("song_units").insert(
+      unit_ids.map((unit_id) => ({
+        song_id: song.id,
+        unit_id,
+      }))
+    );
+
+    if (unitError) {
+      console.error("Failed to add units:", unitError);
+      return { success: false, error: "ユニットの追加に失敗しました" };
+    }
+  }
+
   if (vibe_tag_ids.length > 0) {
     const { error: tagError } = await supabase.from("song_vibe_tags").insert(
       vibe_tag_ids.map((tag_id) => ({
@@ -45,6 +59,7 @@ export async function createSong(input: SongInput): Promise<ActionResult> {
 
     if (tagError) {
       console.error("Failed to add vibe tags:", tagError);
+      return { success: false, error: "タグの追加に失敗しました" };
     }
   }
 
@@ -59,7 +74,7 @@ export async function updateSong(
   input: SongInput
 ): Promise<ActionResult> {
   const supabase = createAdminClient();
-  const { vibe_tag_ids, ...songData } = input;
+  const { unit_ids, vibe_tag_ids, ...songData } = input;
 
   const { error: songError } = await supabase
     .from("songs")
@@ -69,6 +84,23 @@ export async function updateSong(
   if (songError) {
     console.error("Failed to update song:", songError);
     return { success: false, error: "楽曲の更新に失敗しました" };
+  }
+
+  // ユニットを一度削除して再追加
+  await supabase.from("song_units").delete().eq("song_id", id);
+
+  if (unit_ids.length > 0) {
+    const { error: unitError } = await supabase.from("song_units").insert(
+      unit_ids.map((unit_id) => ({
+        song_id: id,
+        unit_id,
+      }))
+    );
+
+    if (unitError) {
+      console.error("Failed to add units:", unitError);
+      return { success: false, error: "ユニットの更新に失敗しました" };
+    }
   }
 
   // タグを一度削除して再追加
@@ -84,6 +116,7 @@ export async function updateSong(
 
     if (tagError) {
       console.error("Failed to add vibe tags:", tagError);
+      return { success: false, error: "タグの更新に失敗しました" };
     }
   }
 
@@ -95,8 +128,7 @@ export async function updateSong(
 
 export async function deleteSong(id: string): Promise<ActionResult> {
   const supabase = createAdminClient();
-  await supabase.from("song_vibe_tags").delete().eq("song_id", id);
-
+  // song_units, song_vibe_tagsはON DELETE CASCADEで自動削除される
   const { error } = await supabase.from("songs").delete().eq("id", id);
 
   if (error) {
@@ -115,7 +147,7 @@ export async function togglePublishSong(id: string): Promise<ActionResult> {
 
   const { data: song, error: fetchError } = await supabase
     .from("songs")
-    .select("*")
+    .select("*, units:song_units(unit:units(*))")
     .eq("id", id)
     .single();
 
@@ -123,7 +155,14 @@ export async function togglePublishSong(id: string): Promise<ActionResult> {
     return { success: false, error: "楽曲が見つかりません" };
   }
 
-  if (!song.is_published && !canPublishSong(song as Song)) {
+  const songWithUnits: Song = {
+    ...song,
+    units: song.units
+      ?.map((su: { unit: { id: string; name: string; slug: string } }) => su.unit)
+      .filter(Boolean) ?? [],
+  };
+
+  if (!song.is_published && !canPublishSong(songWithUnits)) {
     return {
       success: false,
       error: "公開に必要な項目が未設定です（YouTube URL必須、コラボ曲以外はユニットか属性が必須、ソロ曲はメンバー必須）",
