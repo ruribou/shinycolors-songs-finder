@@ -54,14 +54,14 @@ export function SongTable({ songs, units, vibeTags, members }: SongTableProps) {
     const query = searchQuery.toLowerCase();
     return (
       song.title.toLowerCase().includes(query) ||
-      song.unit?.name.toLowerCase().includes(query) ||
+      song.units?.some((u) => u.name.toLowerCase().includes(query)) ||
       song.member?.name.toLowerCase().includes(query)
     );
   });
 
   const [formData, setFormData] = useState({
     title: "",
-    unit_id: "",
+    unit_ids: [] as string[],
     member_id: "",
     song_type: "unit" as SongType,
     attribute: "" as AttributeType | "",
@@ -72,7 +72,7 @@ export function SongTable({ songs, units, vibeTags, members }: SongTableProps) {
   const resetForm = () => {
     setFormData({
       title: "",
-      unit_id: "",
+      unit_ids: [],
       member_id: "",
       song_type: "unit",
       attribute: "",
@@ -134,7 +134,7 @@ export function SongTable({ songs, units, vibeTags, members }: SongTableProps) {
 
     const input = {
       title: formData.title,
-      unit_id: formData.unit_id || null,
+      unit_ids: formData.unit_ids,
       member_id: formData.member_id || null,
       song_type: formData.song_type,
       attribute: formData.attribute || null,
@@ -244,30 +244,50 @@ export function SongTable({ songs, units, vibeTags, members }: SongTableProps) {
                 </div>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    ユニット
-                  </label>
-                  <select
-                    value={formData.unit_id}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        unit_id: e.target.value,
-                        member_id: "",
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-shiny-blue"
-                  >
-                    <option value="">選択してください</option>
-                    {units.map((unit) => (
-                      <option key={unit.id} value={unit.id}>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  ユニット（複数選択可）
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {units.map((unit) => {
+                    const isSelected = formData.unit_ids.includes(unit.id);
+                    return (
+                      <label
+                        key={unit.id}
+                        className={`px-3 py-1.5 rounded-full text-sm transition-colors cursor-pointer ${
+                          isSelected
+                            ? "bg-shiny-blue text-white"
+                            : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          className="hidden"
+                          checked={isSelected}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setFormData({
+                                ...formData,
+                                unit_ids: [...formData.unit_ids, unit.id],
+                              });
+                            } else {
+                              setFormData({
+                                ...formData,
+                                unit_ids: formData.unit_ids.filter(
+                                  (id) => id !== unit.id
+                                ),
+                              });
+                            }
+                          }}
+                        />
                         {unit.name}
-                      </option>
-                    ))}
-                  </select>
+                      </label>
+                    );
+                  })}
                 </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">
                     曲タイプ <span className="text-red-500">*</span>
@@ -460,7 +480,11 @@ export function SongTable({ songs, units, vibeTags, members }: SongTableProps) {
                     {song.title}
                   </td>
                   <td className="px-4 py-3 text-sm text-slate-600">
-                    {song.unit?.name || <span className="text-slate-400">未設定</span>}
+                    {song.units && song.units.length > 0 ? (
+                      song.units.map((u) => u.name).join(", ")
+                    ) : (
+                      <span className="text-slate-400">未設定</span>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-sm text-slate-600">
                     {songTypes.find((t) => t.value === song.song_type)?.label}
