@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import type {
   SongWithRelations,
@@ -72,6 +72,17 @@ export function SongTable({ songs, units, vibeTags, members }: SongTableProps) {
     resetForm();
     setIsFormOpen(true);
   };
+
+  useEffect(() => {
+    if (isFormOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isFormOpen]);
 
   const handleTogglePublish = async (song: SongWithRelations) => {
     const result = await togglePublishSong(song.id);
@@ -148,209 +159,218 @@ export function SongTable({ songs, units, vibeTags, members }: SongTableProps) {
       )}
 
       {isFormOpen && (
-        <div className="bg-white rounded-lg border border-slate-200 p-6">
-          <h2 className="text-lg font-medium text-slate-800 mb-4">
-            楽曲を追加
-          </h2>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  タイトル <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.title}
-                  onChange={(e) =>
-                    setFormData({ ...formData, title: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-shiny-blue"
-                />
+        <div className="fixed inset-0 z-50 flex items-start justify-center">
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() => {
+              setIsFormOpen(false);
+              resetForm();
+            }}
+          />
+          <div className="relative w-full max-w-2xl mx-4 my-4 max-h-[calc(100vh-2rem)] overflow-y-auto bg-white rounded-lg border border-slate-200 p-6">
+            <h2 className="text-lg font-medium text-slate-800 mb-4">
+              楽曲を追加
+            </h2>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    タイトル <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.title}
+                    onChange={(e) =>
+                      setFormData({ ...formData, title: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-shiny-blue"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    YouTube URL
+                  </label>
+                  <input
+                    type="url"
+                    value={formData.youtube_url}
+                    onChange={(e) =>
+                      setFormData({ ...formData, youtube_url: e.target.value })
+                    }
+                    placeholder="https://www.youtube.com/watch?v=..."
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-shiny-blue"
+                  />
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  YouTube URL
-                </label>
-                <input
-                  type="url"
-                  value={formData.youtube_url}
-                  onChange={(e) =>
-                    setFormData({ ...formData, youtube_url: e.target.value })
-                  }
-                  placeholder="https://www.youtube.com/watch?v=..."
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-shiny-blue"
-                />
-              </div>
-            </div>
 
-            <div className="grid gap-4 sm:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    ユニット
+                  </label>
+                  <select
+                    value={formData.unit_id}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        unit_id: e.target.value,
+                        member_id: "",
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-shiny-blue"
+                  >
+                    <option value="">選択してください</option>
+                    {units.map((unit) => (
+                      <option key={unit.id} value={unit.id}>
+                        {unit.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    曲タイプ <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    required
+                    value={formData.song_type}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        song_type: e.target.value as SongType,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-shiny-blue"
+                  >
+                    {songTypes.map((type) => (
+                      <option key={type.value} value={type.value}>
+                        {type.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {formData.song_type === "solo" && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    メンバー <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    required
+                    value={formData.member_id}
+                    onChange={(e) =>
+                      setFormData({ ...formData, member_id: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-shiny-blue"
+                  >
+                    <option value="">選択してください</option>
+                    {members.map((member) => (
+                      <option key={member.id} value={member.id}>
+                        {member.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {(formData.song_type === "collaboration" ||
+                formData.song_type === "other") && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    属性（属性チーム曲の場合）
+                  </label>
+                  <select
+                    value={formData.attribute}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        attribute: e.target.value as AttributeType | "",
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-shiny-blue"
+                  >
+                    <option value="">なし</option>
+                    {attributeOptions.map((attr) => (
+                      <option key={attr.value} value={attr.value}>
+                        {attr.label}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="mt-1 text-xs text-slate-500">
+                    Team.Stella等の曲の場合に選択
+                  </p>
+                </div>
+              )}
+
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  ユニット
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  タグ（3つまで）
                 </label>
-                <select
-                  value={formData.unit_id}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      unit_id: e.target.value,
-                      member_id: "",
-                    })
-                  }
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-shiny-blue"
+                <div className="flex flex-wrap gap-2">
+                  {vibeTags.map((tag) => {
+                    const isSelected = formData.vibe_tag_ids.includes(tag.id);
+                    const isDisabled = !isSelected && formData.vibe_tag_ids.length >= 3;
+                    return (
+                      <label
+                        key={tag.id}
+                        className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
+                          isSelected
+                            ? "bg-shiny-blue text-white cursor-pointer"
+                            : isDisabled
+                              ? "bg-slate-100 text-slate-400 cursor-not-allowed"
+                              : "bg-slate-100 text-slate-700 hover:bg-slate-200 cursor-pointer"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          className="hidden"
+                          checked={isSelected}
+                          disabled={isDisabled}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setFormData({
+                                ...formData,
+                                vibe_tag_ids: [...formData.vibe_tag_ids, tag.id],
+                              });
+                            } else {
+                              setFormData({
+                                ...formData,
+                                vibe_tag_ids: formData.vibe_tag_ids.filter(
+                                  (id) => id !== tag.id
+                                ),
+                              });
+                            }
+                          }}
+                        />
+                        {tag.name}
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-4 py-2 bg-shiny-blue text-white rounded-lg hover:bg-shiny-blue-dark transition-colors disabled:opacity-50 text-sm font-medium"
                 >
-                  <option value="">選択してください</option>
-                  {units.map((unit) => (
-                    <option key={unit.id} value={unit.id}>
-                      {unit.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  曲タイプ <span className="text-red-500">*</span>
-                </label>
-                <select
-                  required
-                  value={formData.song_type}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      song_type: e.target.value as SongType,
-                    })
-                  }
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-shiny-blue"
+                  {isSubmitting ? "保存中..." : "追加する"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsFormOpen(false);
+                    resetForm();
+                  }}
+                  className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors text-sm"
                 >
-                  {songTypes.map((type) => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
-                    </option>
-                  ))}
-                </select>
+                  キャンセル
+                </button>
               </div>
-              </div>
-
-            {formData.song_type === "solo" && (
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  メンバー <span className="text-red-500">*</span>
-                </label>
-                <select
-                  required
-                  value={formData.member_id}
-                  onChange={(e) =>
-                    setFormData({ ...formData, member_id: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-shiny-blue"
-                >
-                  <option value="">選択してください</option>
-                  {members.map((member) => (
-                    <option key={member.id} value={member.id}>
-                      {member.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            {(formData.song_type === "collaboration" ||
-              formData.song_type === "other") && (
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  属性（属性チーム曲の場合）
-                </label>
-                <select
-                  value={formData.attribute}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      attribute: e.target.value as AttributeType | "",
-                    })
-                  }
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-shiny-blue"
-                >
-                  <option value="">なし</option>
-                  {attributeOptions.map((attr) => (
-                    <option key={attr.value} value={attr.value}>
-                      {attr.label}
-                    </option>
-                  ))}
-                </select>
-                <p className="mt-1 text-xs text-slate-500">
-                  Team.Stella等の曲の場合に選択
-                </p>
-              </div>
-            )}
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                タグ（3つまで）
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {vibeTags.map((tag) => {
-                  const isSelected = formData.vibe_tag_ids.includes(tag.id);
-                  const isDisabled = !isSelected && formData.vibe_tag_ids.length >= 3;
-                  return (
-                    <label
-                      key={tag.id}
-                      className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
-                        isSelected
-                          ? "bg-shiny-blue text-white cursor-pointer"
-                          : isDisabled
-                            ? "bg-slate-100 text-slate-400 cursor-not-allowed"
-                            : "bg-slate-100 text-slate-700 hover:bg-slate-200 cursor-pointer"
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        className="hidden"
-                        checked={isSelected}
-                        disabled={isDisabled}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setFormData({
-                              ...formData,
-                              vibe_tag_ids: [...formData.vibe_tag_ids, tag.id],
-                            });
-                          } else {
-                            setFormData({
-                              ...formData,
-                              vibe_tag_ids: formData.vibe_tag_ids.filter(
-                                (id) => id !== tag.id
-                              ),
-                            });
-                          }
-                        }}
-                      />
-                      {tag.name}
-                    </label>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="flex gap-3 pt-4">
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="px-4 py-2 bg-shiny-blue text-white rounded-lg hover:bg-shiny-blue-dark transition-colors disabled:opacity-50 text-sm font-medium"
-              >
-                {isSubmitting ? "保存中..." : "追加する"}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setIsFormOpen(false);
-                  resetForm();
-                }}
-                className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors text-sm"
-              >
-                キャンセル
-              </button>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
       )}
 
