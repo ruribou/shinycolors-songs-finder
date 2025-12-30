@@ -159,19 +159,16 @@ export function SongTable({ songs, units, vibeTags, members }: SongTableProps) {
       )}
 
       {isFormOpen && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-hidden">
-          <div
-            className="absolute inset-0 bg-black/50"
-            style={{ touchAction: "none" }}
-            onClick={() => {
-              setIsFormOpen(false);
-              resetForm();
-            }}
-          />
-          <div
-            className="relative w-full max-w-2xl mx-4 my-4 max-h-[calc(100vh-2rem)] overflow-y-auto bg-white rounded-lg border border-slate-200 p-6"
-            style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y", overscrollBehavior: "contain" }}
-          >
+        <div className="fixed inset-0 z-50 overflow-y-auto overscroll-contain">
+          <div className="min-h-full flex items-start justify-center p-4">
+            <div
+              className="fixed inset-0 bg-black/50"
+              onClick={() => {
+                setIsFormOpen(false);
+                resetForm();
+              }}
+            />
+            <div className="relative w-full max-w-2xl bg-white rounded-lg border border-slate-200 p-6 my-4">
             <h2 className="text-lg font-medium text-slate-800 mb-4">
               楽曲を追加
             </h2>
@@ -374,6 +371,7 @@ export function SongTable({ songs, units, vibeTags, members }: SongTableProps) {
                 </button>
               </div>
             </form>
+            </div>
           </div>
         </div>
       )}
