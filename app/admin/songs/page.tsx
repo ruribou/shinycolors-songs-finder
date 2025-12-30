@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getUnits, getVibeTags } from "@/lib/queries";
 import { SongTable } from "./SongTable";
 import { createClient } from "@/lib/supabase/server";
-import type { SongWithRelations, VibeTag } from "@/lib/types/database";
+import type { SongWithRelations, VibeTag, Unit } from "@/lib/types/database";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +12,7 @@ async function getAdminSongs(): Promise<SongWithRelations[]> {
     .from("songs")
     .select(`
       *,
-      unit:units(*),
+      units:song_units(unit:units(*)),
       member:members(*),
       vibe_tags:song_vibe_tags(vibe_tag:vibe_tags(*))
     `)
@@ -22,9 +22,12 @@ async function getAdminSongs(): Promise<SongWithRelations[]> {
 
   return (data ?? []).map((song) => ({
     ...song,
-    vibe_tags: song.vibe_tags?.map(
-      (svt: { vibe_tag: VibeTag }) => svt.vibe_tag
-    ) ?? [],
+    units:
+      song.units
+        ?.map((su: { unit: Unit }) => su.unit)
+        .filter((u: Unit | null): u is Unit => u !== null) ?? [],
+    vibe_tags:
+      song.vibe_tags?.map((svt: { vibe_tag: VibeTag }) => svt.vibe_tag) ?? [],
   })) as SongWithRelations[];
 }
 
